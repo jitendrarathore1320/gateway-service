@@ -1,0 +1,95 @@
+server:
+#  port: 8760
+  port: 8770
+  
+eureka:
+  instance:
+    hostname: localhost
+#    hostname: 151.106.39.5
+#   hostname: 8.213.20.249 ## alibaba
+    prefer-ip-address: true
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://localhost:8700/eureka
+#      defaultZone: http://151.106.39.5:8700/eureka
+#       defaultZone: http://8.213.20.249:8700/eureka
+
+   
+spring:
+  application:
+    name: api-gateway
+  main:
+    allow-bean-definition-overriding: true
+    
+  cloud:
+   discovery:
+     enabled: true
+   gateway:
+#     default-filters:
+#       - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+#       - AddResponseHeader=Access-Control-Allow-Origin, *
+#    Allow CORS configuration    
+     globalcors:
+         cors-configurations:
+          '[/**]':
+#            allowedOrigins: "http://localhost:4200"
+            allowedOrigins: "*"
+            allowedHeaders: "*"
+            allowedMethods: "*"
+         add-to-simple-url-handler-mapping: true
+         
+     discovery:
+       locator:
+         enabled: true
+         lower-case-service-id: true
+   
+     routes:
+       - id: admin-service
+         uri: lb://admin-service:8701/
+         predicates:
+           - Path=/api/support/**,/api/admin/**,/api/module/**,/api/role/**,/api/news/**,/api/admin_file/**,/api/notification/**,/api/broker/**
+#         filters:
+#            - AuthenticationFilter
+           
+#     - id: market-service
+#       uri: lb://market-service
+#       predicates:
+#        - Path=/api/stock/**, /api/crypto/**,/api/global_news/**
+
+       - id: user-service
+         uri: lb://user-service:8702/
+         predicates:
+           - Path=/api/user/**,/api/subscription/**,/api/user_file/**
+#         filters:
+#           - AuthenticationFilter
+           
+         
+       - id: market-service-new
+         uri: lb://market-service-new:8706/
+         predicates:
+           - Path=/api/stock/**, /api/crypto/**,/api/global_news/**,/api/market_file/**
+#         filters:
+#           - AuthenticationFilter
+        
+       - id: portfolio-service
+         uri: lb://portfolio-service:8704/
+         predicates:
+           - Path=/api/transcation/**,/api/portfolio/**,/api/portfolioInsights/**,/api/broker/**
+#         filters:
+#           - AuthenticationFilter
+           
+       - id: amwal-backend-auth-service
+         uri: lb://amwal-backend-auth-service:8707/
+         predicates:
+           - Path=/auth/**
+     
+     # Angular route configure
+       - id : angular
+         uri: http://151.106.39.5:4200/
+#       uri: http://8.213.20.249:4200/
+         predicates:
+           - Path=/**
+           
+
